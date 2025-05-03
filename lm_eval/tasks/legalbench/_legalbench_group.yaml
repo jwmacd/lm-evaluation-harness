@@ -1,0 +1,10 @@
+group: legalbench
+task:
+  - legalbench_proa
+  - legalbench_function_of_decision_section
+  - legalbench_international_citizenship_questions
+  - legalbench_abercrombie
+  - legalbench_corporate_lobbying
+# Add other legalbench subtasks here if needed
+metadata:
+  version: 0.0 # Using 0.0 as an example version 
