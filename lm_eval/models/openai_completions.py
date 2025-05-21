@@ -266,7 +266,7 @@ class OpenAIChatCompletion(LocalChatCompletion):
         generate=False,
         gen_kwargs: dict = None,
         seed=1234,
-        eos="",
+        eos="<|endoftext|>",
         **kwargs,
     ) -> dict:
         assert type(messages) is not str, (
@@ -278,23 +278,21 @@ class OpenAIChatCompletion(LocalChatCompletion):
         else:
             max_tokens = gen_kwargs.pop("max_gen_toks", self._max_gen_toks)
         temperature = gen_kwargs.pop("temperature", 0)
-        stop_sequences = gen_kwargs.pop("until", [""])
-        stop = handle_stop_sequences(stop_sequences, eos)
+        stop = handle_stop_sequences(gen_kwargs.pop("until", ["<|endoftext|>"]), eos)
         if not isinstance(stop, (list, tuple)):
             stop = [stop]
-        
         output = {
             "messages": messages,
             "model": self.model,
-            "max_completion_tokens": max_tokens, 
+            "max_completion_tokens": max_tokens,
             "temperature": temperature,
-            "stop": stop[:4] if stop else None, 
+            "stop": stop[:4],
             "seed": seed,
             **gen_kwargs,
         }
         if "o1" in self.model:
-            output.pop("stop", None)
+            output.pop("stop")
             output["temperature"] = 1
-        elif "o3" in self.model: 
-            output.pop("temperature", None)
+        elif "o3" in self.model:
+            output.pop("temperature")
         return output
