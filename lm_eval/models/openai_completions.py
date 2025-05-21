@@ -14,6 +14,8 @@ eval_logger = logging.getLogger(__name__)
 
 @register_model("local-completions")
 class LocalCompletionsAPI(TemplateAPI):
+    MULTIMODAL = False
+
     def __init__(
         self,
         base_url=None,
@@ -264,7 +266,7 @@ class OpenAIChatCompletion(LocalChatCompletion):
         generate=False,
         gen_kwargs: dict = None,
         seed=1234,
-        eos="<|endoftext|>",
+        eos="",
         **kwargs,
     ) -> dict:
         assert type(messages) is not str, (
@@ -276,21 +278,23 @@ class OpenAIChatCompletion(LocalChatCompletion):
         else:
             max_tokens = gen_kwargs.pop("max_gen_toks", self._max_gen_toks)
         temperature = gen_kwargs.pop("temperature", 0)
-        stop = handle_stop_sequences(gen_kwargs.pop("until", ["<|endoftext|>"]), eos)
+        stop_sequences = gen_kwargs.pop("until", [""])
+        stop = handle_stop_sequences(stop_sequences, eos)
         if not isinstance(stop, (list, tuple)):
             stop = [stop]
+        
         output = {
             "messages": messages,
             "model": self.model,
-            "max_completion_tokens": max_tokens,
+            "max_completion_tokens": max_tokens, 
             "temperature": temperature,
-            "stop": stop[:4],
+            "stop": stop[:4] if stop else None, 
             "seed": seed,
             **gen_kwargs,
         }
         if "o1" in self.model:
-            output.pop("stop")
+            output.pop("stop", None)
             output["temperature"] = 1
-        elif "o3" in self.model:
-            output.pop("temperature")
+        elif "o3" in self.model: 
+            output.pop("temperature", None)
         return output
