@@ -534,11 +534,7 @@ class TemplateAPI(TemplateLM):
         **kwargs,
     ) -> Union[List[List[str]], List[List[Tuple[float, bool]]]]:
         ctxlens = ctxlens if ctxlens else [None] * len(requests)
-        conn = TCPConnector(
-            limit=self._concurrent, 
-            ssl=self.verify_certificate,
-            keepalive_timeout=300  # Increase from default 15s to 5 minutes
-        )
+        conn = TCPConnector(limit=self._concurrent, ssl=self.verify_certificate)
         async with ClientSession(
             connector=conn, timeout=ClientTimeout(total=self.timeout)
         ) as session:
