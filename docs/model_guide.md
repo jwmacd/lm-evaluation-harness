@@ -183,6 +183,26 @@ class MyCustomLM(LM):
 
 If not implemented for a given model type, the flags `--apply_chat_template` , `--fewshot_as_multiturn`, and `--system_instruction` cannot be used.
 
+## Code Extraction for Code Generation Tasks
+
+For models that tend to output explanations or special formatting alongside code, the OpenAI-compatible models (`local-completions`, `local-chat-completions`, `openai-completions`, `openai-chat-completions`) support automatic code extraction. This feature helps improve evaluation accuracy on code generation tasks like HumanEval and MBPP by:
+
+- Removing special tokens (`<|im_start|>`, `<|im_end|>`, etc.)
+- Stripping thinking tags (`<think>...</think>`)
+- Extracting code from markdown fences
+- Normalizing indentation
+- Validating Python syntax
+
+To enable code extraction, add `extract_code=true` to your model arguments:
+
+```bash
+lm_eval --model local-completions \
+    --model_args base_url=http://localhost:8000/v1/completions,model=your-model,extract_code=true \
+    --tasks humaneval
+```
+
+The extraction logic is implemented in `lm_eval/models/code_extraction.py` and automatically falls back to the original output if extraction fails.
+
 ## Other
 
 **Pro tip**: In order to make the Evaluation Harness overestimate total runtimes rather than underestimate it, HuggingFace models come in-built with the ability to provide responses on data points in *descending order by total input length* via `lm_eval.utils.Reorderer`. Take a look at `lm_eval.models.hf_causal.HFLM` to see how this is done, and see if you can implement it in your own model!
