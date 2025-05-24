@@ -57,7 +57,7 @@ class LocalCompletionsAPI(TemplateAPI):
                 "model": self.model,
                 "prompt": messages,
                 "temperature": 0,
-                "max_tokens": 0,
+                "max_tokens": 1,
                 "logprobs": 1,
                 "seed": seed,
                 "echo": True,
