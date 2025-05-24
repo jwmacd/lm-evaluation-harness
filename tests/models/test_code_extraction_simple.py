@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-Simple test script for code extraction functionality
+Simple test script for minimal code extraction functionality.
+
+This tests only noise removal, NOT validation or syntax checking.
 """
 
 import sys
@@ -51,17 +53,17 @@ def test_extract_code():
             "expected": "def first():\n    return 1\n\ndef second():\n    return 2",
             "description": "Multiple functions in one block"
         },
-        # Invalid code (should raise ValueError)
+        # Invalid code (should pass through unchanged)
         {
             "input": "This is not valid Python code at all!",
-            "expected": ValueError,
-            "description": "Invalid code (should fail)"
+            "expected": "This is not valid Python code at all!",
+            "description": "Invalid code (passes through)"
         },
         # Empty input
         {
             "input": "",
-            "expected": ValueError,
-            "description": "Empty input (should fail)"
+            "expected": "",
+            "description": "Empty input"
         }
     ]
     
@@ -72,26 +74,12 @@ def test_extract_code():
         print(f"\nTest {i+1}: {test['description']}")
         print(f"Input preview: {repr(test['input'][:50])}...")
         
-        try:
-            result = extract_code(test['input'])
-            if test['expected'] == ValueError:
-                print(f"❌ FAILED: Expected ValueError but got: {repr(result[:50])}...")
-                failed += 1
-            elif result == test['expected']:
-                print(f"✅ PASSED: Got expected output")
-                passed += 1
-            else:
-                print(f"❌ FAILED: Expected {repr(test['expected'][:50])}, got {repr(result[:50])}")
-                failed += 1
-        except ValueError as e:
-            if test['expected'] == ValueError:
-                print(f"✅ PASSED: Got expected ValueError: {e}")
-                passed += 1
-            else:
-                print(f"❌ FAILED: Unexpected ValueError: {e}")
-                failed += 1
-        except Exception as e:
-            print(f"❌ ERROR: Unexpected exception: {type(e).__name__}: {e}")
+        result = extract_code(test['input'])
+        if result == test['expected']:
+            print(f"✅ PASSED: Got expected output")
+            passed += 1
+        else:
+            print(f"❌ FAILED: Expected {repr(test['expected'][:50])}, got {repr(result[:50])}")
             failed += 1
     
     return passed, failed

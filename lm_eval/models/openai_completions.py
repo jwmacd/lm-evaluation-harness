@@ -7,7 +7,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from lm_eval.api.registry import register_model
 from lm_eval.models.api_models import TemplateAPI
 from lm_eval.models.utils import handle_stop_sequences
-from lm_eval.models.code_extraction import extract_code
 
 
 eval_logger = logging.getLogger(__name__)
@@ -23,7 +22,6 @@ class LocalCompletionsAPI(TemplateAPI):
         tokenizer_backend="huggingface",
         **kwargs,
     ):
-        self.extract_code = kwargs.pop("extract_code", False)
         super().__init__(
             base_url=base_url, tokenizer_backend=tokenizer_backend, **kwargs
         )
@@ -101,18 +99,6 @@ class LocalCompletionsAPI(TemplateAPI):
                 tmp[choices["index"]] = choices["text"]
             res = res + tmp
         
-        # Apply code extraction if enabled
-        if self.extract_code:
-            processed = []
-            for text in res:
-                try:
-                    clean_code = extract_code(text)
-                    processed.append(clean_code)
-                except ValueError:
-                    # Fall back to original text if extraction fails
-                    processed.append(text)
-            return processed
-        
         return res
 
     @property
@@ -132,7 +118,6 @@ class LocalChatCompletion(LocalCompletionsAPI):
         eval_logger.warning(
             "chat-completions endpoint requires the `--apply_chat_template` flag."
         )
-        self.extract_code = kwargs.pop("extract_code", False)
         super().__init__(
             base_url=base_url,
             tokenizer_backend=tokenizer_backend,
@@ -185,18 +170,6 @@ class LocalChatCompletion(LocalCompletionsAPI):
             for choices in out["choices"]:
                 tmp[choices["index"]] = choices["message"]["content"]
             res = res + tmp
-        
-        # Apply code extraction if enabled
-        if self.extract_code:
-            processed = []
-            for text in res:
-                try:
-                    clean_code = extract_code(text)
-                    processed.append(clean_code)
-                except ValueError:
-                    # Fall back to original text if extraction fails
-                    processed.append(text)
-            return processed
         
         return res
 
