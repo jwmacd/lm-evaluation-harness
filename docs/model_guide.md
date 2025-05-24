@@ -185,13 +185,13 @@ If not implemented for a given model type, the flags `--apply_chat_template` , `
 
 ## Code Extraction for Code Generation Tasks
 
-For models that tend to output explanations or special formatting alongside code, the OpenAI-compatible models (`local-completions`, `local-chat-completions`, `openai-completions`, `openai-chat-completions`) support automatic code extraction. This feature helps improve evaluation accuracy on code generation tasks like HumanEval and MBPP by:
+For models that tend to output formatting artifacts alongside code, the OpenAI-compatible models (`local-completions`, `local-chat-completions`, `openai-completions`, `openai-chat-completions`) support lightweight code extraction. This feature removes common formatting noise without validating the code itself:
 
-- Removing special tokens (`<|im_start|>`, `<|im_end|>`, etc.)
-- Stripping thinking tags (`<think>...</think>`)
-- Extracting code from markdown fences
-- Normalizing indentation
-- Validating Python syntax
+- Removes special tokens (`<|im_start|>`, `<|im_end|>`, etc.)
+- Strips thinking tags (`<think>...</think>`)
+- Extracts code from markdown fences
+- Removes common preambles like "Here's the solution:"
+- Preserves indentation (important for tasks like HumanEval)
 
 To enable code extraction, add `extract_code=true` to your model arguments:
 
@@ -201,7 +201,7 @@ lm_eval --model local-completions \
     --tasks humaneval
 ```
 
-The extraction logic is implemented in `lm_eval/models/code_extraction.py` and automatically falls back to the original output if extraction fails.
+The extraction is minimal and non-validating to avoid "cheating" on evaluations. It only removes formatting artifacts while preserving the actual code output, including any errors the model might have made.
 
 ## Other
 

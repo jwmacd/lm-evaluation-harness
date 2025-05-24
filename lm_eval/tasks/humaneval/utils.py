@@ -1,5 +1,7 @@
 import evaluate as hf_evaluate
 
+from lm_eval.models.code_extraction import extract_code
+
 
 try:
     compute_ = hf_evaluate.load("code_eval")
@@ -24,15 +26,19 @@ def pass_at_k(references: list[str], predictions: list[list[str]], k: list[int] 
 
 
 def build_predictions(resps: list[list[str]], docs: list[dict]) -> list[list[str]]:
-    return [[doc["prompt"] + r for r in resp] for resp, doc in zip(resps, docs)]
+    # Apply code extraction to clean responses before concatenating with prompt
+    return [[doc["prompt"] + extract_code(r) for r in resp] for resp, doc in zip(resps, docs)]
 
 
 def build_predictions_instruct(
     resps: list[list[str]], docs: list[dict]
 ) -> list[list[str]]:
+    # Apply code extraction to clean responses before concatenating with prompt
+    # Note: The original code tried to remove trailing ```, but our extract_code
+    # function handles this more robustly
     return [
         [
-            doc["prompt"] + (r if r.rfind("```") == -1 else r[: r.rfind("```")])
+            doc["prompt"] + extract_code(r)
             for r in resp
         ]
         for resp, doc in zip(resps, docs)

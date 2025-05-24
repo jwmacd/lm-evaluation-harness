@@ -3,6 +3,8 @@ from typing import Union
 
 import evaluate as hf_evaluate
 
+from lm_eval.models.code_extraction import extract_code
+
 
 try:
     pass_at_k = hf_evaluate.load("code_eval")
@@ -22,9 +24,16 @@ def pass_at_1(
         references = [references]
     if isinstance(predictions[0], str):
         predictions = [[p] for p in predictions]
+    
+    # Apply code extraction to clean each prediction before evaluation
+    cleaned_predictions = []
+    for pred_list in predictions:
+        cleaned_list = [extract_code(pred) for pred in pred_list]
+        cleaned_predictions.append(cleaned_list)
+    
     return pass_at_k.compute(
         references=references,
-        predictions=predictions,
+        predictions=cleaned_predictions,
         k=[1],
     )[0]["pass@1"]
 
