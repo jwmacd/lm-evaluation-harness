@@ -14,8 +14,6 @@ eval_logger = logging.getLogger(__name__)
 
 @register_model("local-completions")
 class LocalCompletionsAPI(TemplateAPI):
-    MULTIMODAL = False
-
     def __init__(
         self,
         base_url=None,
@@ -89,7 +87,8 @@ class LocalCompletionsAPI(TemplateAPI):
                 res.append((logprobs, is_greedy))
         return res
 
-    def parse_generations(self, outputs: Union[Dict, List[Dict]], **kwargs) -> List[str]:
+    @staticmethod
+    def parse_generations(outputs: Union[Dict, List[Dict]], **kwargs) -> List[str]:
         res = []
         if not isinstance(outputs, list):
             outputs = [outputs]
@@ -98,7 +97,6 @@ class LocalCompletionsAPI(TemplateAPI):
             for choices in out["choices"]:
                 tmp[choices["index"]] = choices["text"]
             res = res + tmp
-        
         return res
 
     @property
@@ -161,7 +159,8 @@ class LocalChatCompletion(LocalCompletionsAPI):
             **gen_kwargs,
         }
 
-    def parse_generations(self, outputs: Union[Dict, List[Dict]], **kwargs) -> List[str]:
+    @staticmethod
+    def parse_generations(outputs: Union[Dict, List[Dict]], **kwargs) -> List[str]:
         res = []
         if not isinstance(outputs, list):
             outputs = [outputs]
@@ -170,7 +169,6 @@ class LocalChatCompletion(LocalCompletionsAPI):
             for choices in out["choices"]:
                 tmp[choices["index"]] = choices["message"]["content"]
             res = res + tmp
-        
         return res
 
     def tok_encode(
