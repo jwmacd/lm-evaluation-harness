@@ -14,6 +14,8 @@ eval_logger = logging.getLogger(__name__)
 
 @register_model("local-completions")
 class LocalCompletionsAPI(TemplateAPI):
+    MULTIMODAL = False
+
     def __init__(
         self,
         base_url=None,
@@ -55,7 +57,7 @@ class LocalCompletionsAPI(TemplateAPI):
                 "model": self.model,
                 "prompt": messages,
                 "temperature": 0,
-                "max_tokens": 1,
+                "max_tokens": 0,
                 "logprobs": 1,
                 "seed": seed,
                 "echo": False,
@@ -87,8 +89,7 @@ class LocalCompletionsAPI(TemplateAPI):
                 res.append((logprobs, is_greedy))
         return res
 
-    @staticmethod
-    def parse_generations(outputs: Union[Dict, List[Dict]], **kwargs) -> List[str]:
+    def parse_generations(self, outputs: Union[Dict, List[Dict]], **kwargs) -> List[str]:
         res = []
         if not isinstance(outputs, list):
             outputs = [outputs]
@@ -159,8 +160,7 @@ class LocalChatCompletion(LocalCompletionsAPI):
             **gen_kwargs,
         }
 
-    @staticmethod
-    def parse_generations(outputs: Union[Dict, List[Dict]], **kwargs) -> List[str]:
+    def parse_generations(self, outputs: Union[Dict, List[Dict]], **kwargs) -> List[str]:
         res = []
         if not isinstance(outputs, list):
             outputs = [outputs]
