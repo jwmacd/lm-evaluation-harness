@@ -60,7 +60,7 @@ class LocalCompletionsAPI(TemplateAPI):
                 "max_tokens": 0,
                 "logprobs": 1,
                 "seed": seed,
-                "echo": False,
+                "echo": True,
             }
 
     @staticmethod
